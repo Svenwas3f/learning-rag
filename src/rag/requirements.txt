@@ -1,0 +1,18 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.18
+requests==2.31.0
+
+# LangChain and dependencies
+langchain==0.3.13
+langchain-community==0.3.13
+langchain-core==0.3.28
+
+# Document loaders
+pypdf==5.1.0
+unstructured==0.16.9
+markdown==3.7
+
+# Vector store and embeddings
+qdrant-client==1.12.1
+ollama==0.4.4
