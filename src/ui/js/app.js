@@ -174,11 +174,17 @@ function openNewTopicModal() {
     // Add input listener for topic name changes after upload
     const topicInput = modal.querySelector('.topic-name-input');
     topicInput.addEventListener('input', () => {
+        console.log('Input changed, _createdTopicName:', modal._createdTopicName, 'current value:', topicInput.value.trim());
         if (modal._createdTopicName) {
             const createBtn = modal.querySelector('.btn-primary');
-            if (topicInput.value.trim() !== modal._createdTopicName && topicInput.value.trim() !== '') {
+            const isDifferent = topicInput.value.trim() !== modal._createdTopicName;
+            const isNotEmpty = topicInput.value.trim() !== '';
+            console.log('isDifferent:', isDifferent, 'isNotEmpty:', isNotEmpty);
+            if (isDifferent && isNotEmpty) {
+                console.log('Enabling Save Changes button');
                 createBtn.disabled = false;
             } else {
+                console.log('Disabling Save Changes button');
                 createBtn.disabled = true;
             }
         }
@@ -391,6 +397,13 @@ async function createNewTopic() {
         createBtn.disabled = true;
         cancelBtn.disabled = false;
         cancelBtn.textContent = 'Close';
+        
+        // Ensure topic name input is enabled for renaming
+        const topicInput = modal.querySelector('.topic-name-input');
+        if (topicInput) {
+            topicInput.disabled = false;
+            topicInput.focus();
+        }
         
         // Update cancel button to just close (not call closeTopicModal which might have issues)
         cancelBtn.onclick = () => {
