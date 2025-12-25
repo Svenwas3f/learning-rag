@@ -1,6 +1,6 @@
-// Configuration
-const API_URL = 'http://localhost:8000';
-const COLLECTION_NAME = 'learning_materials';
+// Configuration - Load from config.js
+const API_URL = window.RAG_CONFIG?.API_URL || 'http://localhost:8000';
+const COLLECTION_NAME = window.RAG_CONFIG?.COLLECTION_NAME || 'learning_materials';
 
 // Load topics on page load
 document.addEventListener('DOMContentLoaded', function() {

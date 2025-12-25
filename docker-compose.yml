@@ -2,23 +2,23 @@ services:
   web:
     image: nginx:latest
     ports:
-      - "80:80"
+      - "${WEB_PORT:-80}:80"
     volumes:
       - ./src/ui:/usr/share/nginx/html
     depends_on:
       - rag
     restart: unless-stopped
+    env_file:
+      - .env
 
   rag: 
     build: ./src/rag
     ports:
-      - "8000:8000"
+      - "${API_EXTERNAL_PORT:-8000}:${API_PORT:-8000}"
     volumes:
       - ./src/rag:/app
-    environment:
-      - PYTHONUNBUFFERED=1
-      - OLLAMA_URL=http://ollama:11434
-      - QDRANT_URL=http://vector-db:6333
+    env_file:
+      - .env
     depends_on:
       - vector-db
       - ollama
@@ -28,26 +28,31 @@ services:
   vector-db:
     image: qdrant/qdrant:latest
     ports:
-      - "6333:6333"
-      - "6334:6334"
+      - "${QDRANT_REST_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
     volumes:
       - vector_data:/qdrant/storage
     restart: unless-stopped
+    env_file:
+      - .env
 
   ollama:
     image: ollama/ollama:latest
     ports:
-      - "11434:11434"
+      - "${OLLAMA_PORT:-11434}:11434"
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped
+    env_file:
+      - .env
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |
         ollama serve &
-        sleep 5
-        ollama pull qwen2.5:0.5b
-        ollama pull nomic-embed-text
+        sleep ${OLLAMA_STARTUP_DELAY:-5}
+        for model in ${OLLAMA_MODELS:-qwen2.5:0.5b nomic-embed-text}; do
+          ollama pull $model
+        done
         wait
   
 volumes:

@@ -75,22 +75,22 @@ app.add_middleware(
 indexer = DocumentIndexer(
     ollama_url=os.getenv("OLLAMA_URL", "http://localhost:11434"),
     qdrant_url=os.getenv("QDRANT_URL", "http://localhost:6333"),
-    embedding_model="nomic-embed-text"
+    embedding_model=os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
 )
 
 retriever = DocumentRetriever(
     qdrant_url=os.getenv("QDRANT_URL", "http://localhost:6333"),
     ollama_url=os.getenv("OLLAMA_URL", "http://localhost:11434"),
-    embedding_model="nomic-embed-text"
+    embedding_model=os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
 )
 
 chat_generator = ChatGenerator(
     ollama_url=os.getenv("OLLAMA_URL", "http://localhost:11434"),
-    model="qwen2.5:0.5b"
+    model=os.getenv("LLM_MODEL", "qwen2.5:0.5b")
 )
 
 # Default collection name
-COLLECTION_NAME = "learning_materials"
+COLLECTION_NAME = os.getenv("COLLECTION_NAME", "learning_materials")
 
 # Request/Response models
 class SearchRequest(BaseModel):

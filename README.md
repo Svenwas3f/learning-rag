@@ -31,23 +31,32 @@ A powerful Retrieval-Augmented Generation (RAG) system that lets you upload your
    cd learning-rag
    ```
 
-2. **Start the application**
+2. **Configure environment (optional)**
+   ```bash
+   cp .env.example .env
+   # Edit .env to customize settings (ports, models, etc.)
+   ```
+   See [CONFIGURATION.md](CONFIGURATION.md) for all options.
+
+3. **Start the application**
    ```bash
    docker compose up -d
    ```
 
-3. **Wait for models to download** (first time only, ~2-3 minutes)
+4. **Wait for models to download** (first time only, ~2-3 minutes)
    ```bash
    docker compose logs -f ollama
    ```
    Wait until you see "qwen2.5:0.5b" and "nomic-embed-text" pulled successfully.
 
-4. **Access the application**
+5. **Access the application**
    - Web UI: http://localhost:80
    - API Documentation: http://localhost:8000/docs
    - Alternative API access: http://localhost:8000
 
 That's it! 🎉
+
+> 💡 **Tip:** Check [CONFIGURATION.md](CONFIGURATION.md) to customize ports, models, and other settings.
 
 ## 📖 Usage
 
@@ -128,37 +137,50 @@ docker compose down
 docker compose down -v
 ```
 
-### Environment Variables
+### Configuration
 
-Create a `.env` file to customize configuration:
+All settings are managed through environment variables in the `.env` file.
 
-```env
-# Ollama Configuration
-OLLAMA_URL=http://ollama:11434
+**Quick Start:**
+```bash
+# Copy example configuration
+cp .env.example .env
 
-# Qdrant Configuration
-QDRANT_URL=http://vector-db:6333
+# Edit with your settings
+nano .env
 
-# Application Settings
-PYTHONUNBUFFERED=1
+# Apply changes
+docker compose down
+docker compose up -d
 ```
+
+**Common Configuration Options:**
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `WEB_PORT` | `80` | Web UI port |
+| `API_EXTERNAL_PORT` | `8000` | API port |
+| `LLM_MODEL` | `qwen2.5:0.5b` | LLM model to use |
+| `EMBEDDING_MODEL` | `nomic-embed-text` | Embedding model |
+| `COLLECTION_NAME` | `learning_materials` | Default collection |
+| `CORS_ORIGINS` | `*` | Allowed CORS origins |
+
+**📖 See [CONFIGURATION.md](CONFIGURATION.md) for complete documentation.**
 
 ### Port Configuration
 
 Default ports:
-- **80**: Web UI (Nginx)
-- **8000**: FastAPI API
-- **6333**: Qdrant REST API
-- **6334**: Qdrant gRPC API
-- **11434**: Ollama API
+- **80**: Web UI (Nginx) - Configure with `WEB_PORT`
+- **8000**: FastAPI API - Configure with `API_EXTERNAL_PORT`
+- **6333**: Qdrant REST API - Configure with `QDRANT_REST_PORT`
+- **6334**: Qdrant gRPC API - Configure with `QDRANT_GRPC_PORT`
+- **11434**: Ollama API - Configure with `OLLAMA_PORT`
 
-To change ports, edit `docker-compose.yml`:
+**Example: Change web port to 8080**
 
-```yaml
-services:
-  web:
-    ports:
-      - "8080:80"  # Change 80 to your preferred port
+Edit `.env`:
+```env
+WEB_PORT=8080
 ```
 
 ### Production Deployment
