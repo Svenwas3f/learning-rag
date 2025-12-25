@@ -358,25 +358,64 @@ async function createNewTopic() {
         
         // Complete progress
         progressFill.style.width = '100%';
-        progressText.textContent = 'Upload complete! Click Close to dismiss this window.';
+        progressText.textContent = 'Upload complete! You can rename the topic or close this window.';
         
         // Reload topics to show the new topic
         loadTopics();
         
-        // Simplify: Just make both buttons close the modal
-        createBtn.textContent = 'Close';
+        // Store the created topic name for potential rename
+        modal._createdTopicName = topicName;
+        
+        // Enable Save Changes button for renaming
+        const topicInput = modal.querySelector('.topic-name-input');
+        createBtn.textContent = 'Save Changes';
         createBtn.disabled = false;
         cancelBtn.disabled = false;
         cancelBtn.textContent = 'Close';
         
-        // Both buttons close the modal
-        const closeModal = () => {
+        // Save Changes button now handles rename
+        createBtn.onclick = async () => {
+            const newName = topicInput.value.trim();
+            if (!newName || newName === topicName) {
+                // No change, just close
+                modal.classList.remove('active');
+                setTimeout(() => modal.remove(), 300);
+                return;
+            }
+            
+            // Rename the topic
+            createBtn.disabled = true;
+            createBtn.textContent = 'Renaming...';
+            
+            try {
+                const response = await fetch(
+                    `${API_URL}/topics/${encodeURIComponent(topicName)}?new_name=${encodeURIComponent(newName)}&collection_name=${COLLECTION_NAME}`,
+                    { method: 'PUT' }
+                );
+                
+                if (response.ok) {
+                    modal.classList.remove('active');
+                    setTimeout(() => modal.remove(), 300);
+                    loadTopics();
+                } else {
+                    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+                    alert(`Failed to rename topic: ${error.detail}`);
+                    createBtn.disabled = false;
+                    createBtn.textContent = 'Save Changes';
+                }
+            } catch (error) {
+                console.error('Error renaming topic:', error);
+                alert('Error renaming topic: ' + error.message);
+                createBtn.disabled = false;
+                createBtn.textContent = 'Save Changes';
+            }
+        };
+        
+        // Close button just closes
+        cancelBtn.onclick = () => {
             modal.classList.remove('active');
             setTimeout(() => modal.remove(), 300);
         };
-        
-        createBtn.onclick = closeModal;
-        cancelBtn.onclick = closeModal;
         
         // Only show alert if there were failures
         if (failCount > 0) {
