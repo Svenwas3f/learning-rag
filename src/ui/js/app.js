@@ -383,12 +383,12 @@ async function createNewTopic() {
         // Reload topics to show the new topic
         loadTopics();
         
-        // Store the topic name for potential renaming
+        // Store the topic name for potential renaming (must be set BEFORE disabling button)
         modal._createdTopicName = topicName;
         
         // Reset Create button to be re-enabled when name changes
-        createBtn.disabled = true;
         createBtn.textContent = 'Save Changes';
+        createBtn.disabled = true;
         cancelBtn.disabled = false;
         cancelBtn.textContent = 'Close';
         
