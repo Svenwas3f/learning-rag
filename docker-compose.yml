@@ -48,12 +48,42 @@ services:
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |
+        # Start ollama in the background
         ollama serve &
-        sleep ${OLLAMA_STARTUP_DELAY:-5}
-        for model in ${OLLAMA_MODELS:-qwen2.5:0.5b nomic-embed-text}; do
-          ollama pull $model
+        OLLAMA_PID=$$!
+        
+        # Wait for ollama to be ready
+        echo "Waiting for Ollama server to be ready..."
+        sleep $${OLLAMA_STARTUP_DELAY:-5}
+        
+        # Health check - wait until server is responding
+        MAX_RETRIES=30
+        RETRY_COUNT=0
+        until ollama list > /dev/null 2>&1 || [ $$RETRY_COUNT -eq $$MAX_RETRIES ]; do
+          echo "Waiting for Ollama server... ($$RETRY_COUNT/$$MAX_RETRIES)"
+          sleep 2
+          RETRY_COUNT=$$((RETRY_COUNT + 1))
         done
-        wait
+        
+        if [ $$RETRY_COUNT -eq $$MAX_RETRIES ]; then
+          echo "ERROR: Ollama server failed to start"
+          exit 1
+        fi
+        
+        echo "Ollama server is ready"
+        
+        # Pull models
+        echo "Starting model downloads..."
+        for model in $${OLLAMA_MODELS:-qwen2.5:0.5b nomic-embed-text}; do
+          if [ -n "$$model" ]; then
+            echo "Pulling model: $$model"
+            ollama pull "$$model" || echo "Failed to pull model: $$model"
+          fi
+        done
+        echo "Model downloads complete."
+        
+        # Keep the container running
+        wait $$OLLAMA_PID
   
 volumes:
   vector_data: {}
