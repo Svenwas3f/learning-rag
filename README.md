@@ -36,7 +36,6 @@ A powerful Retrieval-Augmented Generation (RAG) system that lets you upload your
    cp .env.example .env
    # Edit .env to customize settings (ports, models, etc.)
    ```
-   See [CONFIGURATION.md](CONFIGURATION.md) for all options.
 
 3. **Start the application**
    ```bash

@@ -1,12 +1,17 @@
 fastapi==0.115.5
 uvicorn[standard]==0.32.1
 python-multipart==0.0.18
-requests==2.31.0
 
-# LangChain and dependencies
+# LangChain core and integrations
 langchain==0.3.13
 langchain-community==0.3.13
 langchain-core==0.3.28
+langchain-ollama==0.2.0
+
+# Optional LLM providers (uncomment to use)
+# langchain-openai==0.2.14         # For OpenAI GPT models
+# langchain-anthropic==0.3.11      # For Anthropic Claude
+# langchain-google-genai==2.0.10   # For Google Gemini
 
 # Document loaders
 pypdf==5.1.0
