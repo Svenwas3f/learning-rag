@@ -378,7 +378,7 @@ async function createNewTopic() {
         
         // Complete progress
         progressFill.style.width = '100%';
-        progressText.textContent = 'Upload complete! You can close this window.';
+        progressText.textContent = 'Upload complete! You can rename the topic or close this window.';
         
         // Reload topics to show the new topic
         loadTopics();
@@ -386,11 +386,17 @@ async function createNewTopic() {
         // Store the topic name for potential renaming (must be set BEFORE disabling button)
         modal._createdTopicName = topicName;
         
-        // Reset Create button to be re-enabled when name changes
+        // Change button behavior after successful upload
         createBtn.textContent = 'Save Changes';
         createBtn.disabled = true;
         cancelBtn.disabled = false;
         cancelBtn.textContent = 'Close';
+        
+        // Update cancel button to just close (not call closeTopicModal which might have issues)
+        cancelBtn.onclick = () => {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        };
         
         // Only show alert if there were failures
         if (failCount > 0) {
