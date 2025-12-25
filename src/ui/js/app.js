@@ -171,25 +171,6 @@ function openNewTopicModal() {
     // Show modal
     setTimeout(() => modal.classList.add('active'), 10);
     
-    // Add input listener for topic name changes after upload
-    const topicInput = modal.querySelector('.topic-name-input');
-    topicInput.addEventListener('input', () => {
-        console.log('Input changed, _createdTopicName:', modal._createdTopicName, 'current value:', topicInput.value.trim());
-        if (modal._createdTopicName) {
-            const createBtn = modal.querySelector('.btn-primary');
-            const isDifferent = topicInput.value.trim() !== modal._createdTopicName;
-            const isNotEmpty = topicInput.value.trim() !== '';
-            console.log('isDifferent:', isDifferent, 'isNotEmpty:', isNotEmpty);
-            if (isDifferent && isNotEmpty) {
-                console.log('Enabling Save Changes button');
-                createBtn.disabled = false;
-            } else {
-                console.log('Disabling Save Changes button');
-                createBtn.disabled = true;
-            }
-        }
-    });
-    
     // Setup file upload area
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
@@ -305,13 +286,6 @@ async function createNewTopic() {
     const topicName = modal.querySelector('.topic-name-input').value.trim();
     console.log('topicName:', topicName);
     
-    // Check if this is a rename operation (after initial upload)
-    if (modal._createdTopicName) {
-        // This is a rename operation
-        await renameCreatedTopic();
-        return;
-    }
-    
     const files = modal._selectedFiles || [];
     console.log('files:', files, 'length:', files.length);
     
@@ -384,32 +358,25 @@ async function createNewTopic() {
         
         // Complete progress
         progressFill.style.width = '100%';
-        progressText.textContent = 'Upload complete! You can rename the topic or close this window.';
+        progressText.textContent = 'Upload complete! Click Close to dismiss this window.';
         
         // Reload topics to show the new topic
         loadTopics();
         
-        // Store the topic name for potential renaming (must be set BEFORE disabling button)
-        modal._createdTopicName = topicName;
-        
-        // Change button behavior after successful upload
-        createBtn.textContent = 'Save Changes';
-        createBtn.disabled = true;
+        // Simplify: Just make both buttons close the modal
+        createBtn.textContent = 'Close';
+        createBtn.disabled = false;
         cancelBtn.disabled = false;
         cancelBtn.textContent = 'Close';
         
-        // Ensure topic name input is enabled for renaming
-        const topicInput = modal.querySelector('.topic-name-input');
-        if (topicInput) {
-            topicInput.disabled = false;
-            topicInput.focus();
-        }
-        
-        // Update cancel button to just close (not call closeTopicModal which might have issues)
-        cancelBtn.onclick = () => {
+        // Both buttons close the modal
+        const closeModal = () => {
             modal.classList.remove('active');
             setTimeout(() => modal.remove(), 300);
         };
+        
+        createBtn.onclick = closeModal;
+        cancelBtn.onclick = closeModal;
         
         // Only show alert if there were failures
         if (failCount > 0) {
@@ -437,57 +404,6 @@ async function createNewTopic() {
         cancelBtn.disabled = false;
     }
 }
-
-async function renameCreatedTopic() {
-    const modal = document.querySelector('.topic-modal');
-    const newTopicName = modal.querySelector('.topic-name-input').value.trim();
-    const oldTopicName = modal._createdTopicName;
-    
-    if (!newTopicName) {
-        alert('Please enter a topic name');
-        return;
-    }
-    
-    if (newTopicName === oldTopicName) {
-        // No change, just close
-        closeTopicModal();
-        return;
-    }
-    
-    const saveBtn = modal.querySelector('.btn-primary');
-    const originalText = saveBtn.textContent;
-    
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'Renaming...';
-    
-    try {
-        const response = await fetch(
-            `${API_URL}/topics/${encodeURIComponent(oldTopicName)}?new_name=${encodeURIComponent(newTopicName)}&collection_name=${COLLECTION_NAME}`,
-            { method: 'PUT' }
-        );
-        
-        if (response.ok) {
-            const data = await response.json();
-            modal._createdTopicName = newTopicName;
-            closeTopicModal();
-            loadTopics();
-            if (data.updated_count > 0) {
-                console.log(`Topic renamed: ${data.updated_count} chunks updated`);
-            }
-        } else {
-            const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-            alert(`Failed to rename topic: ${error.detail}`);
-            saveBtn.disabled = false;
-            saveBtn.textContent = originalText;
-        }
-    } catch (error) {
-        console.error('Error renaming topic:', error);
-        alert('Error renaming topic: ' + error.message);
-        saveBtn.disabled = false;
-        saveBtn.textContent = originalText;
-    }
-}
-
 function openTopicModal(topicItem, topicName) {
     // Create modal
     const modal = document.createElement('div');
